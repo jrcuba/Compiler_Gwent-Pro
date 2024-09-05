@@ -6,6 +6,8 @@ public class Parser
 {
     public object ReadTokens(List<Token> tokens, int i, ref List<Exceptions> exceptions, ref List<Effect> effects, ref List<Card> cards)
     {
+
+
         //Lectura de efectos
         if (tokens[i].Value == "effect")
         {
@@ -14,7 +16,9 @@ public class Parser
             {
                 for (int j = i + 2; j < tokens.Count; j++)
                 {
-                    //lógica del nombre
+
+
+                    //Manejo del nombre del efecto 
                     if (tokens[j].Value == "Name")
                     {
                         if (tokens[j + 1].Value == ":")
@@ -33,7 +37,9 @@ public class Parser
                             exceptions.Add(new Exceptions("Error ,faltan los 2 puntos en la declaración del nombre del efecto o está algo que no debería en su logar", 0, 0));
                         }
                     }
-                    //lógica de carga de parámetros
+
+
+                    //Manejo de los parámetros del efecto
                     else if (tokens[j].Value == "Params")
                     {
                         if (tokens[j + 1].Value == ":")
@@ -78,7 +84,9 @@ public class Parser
                             }
                         }
                     }
-                    //Lógica de carga de acción
+                    //Guardar la acción a realizar en una lista de tokens
+
+
                     else if (tokens[j].Value == "Action")
                     {
                         if (tokens[j + 1].Value == ":")
@@ -173,7 +181,10 @@ public class Parser
                 exceptions.Add(new Exceptions("Error ,falta el corchete de apertura en la declaración del efecto", 0, 0));
             }
         }
-        //Parseo de cartas
+
+
+
+        //Lectura de cartas
         else if (tokens[i].Value == "card")
         {
             // Crear un GameObject padre para las cartas
@@ -184,8 +195,11 @@ public class Parser
             if (i + 1 < tokens.Count) {
                 if (tokens[i + 1].Value == "{")
                 {
+                    //Bucler para recorrer los tokens de las cartas
                     for (int j = i + 2; j < tokens.Count; j++)
                     {
+
+
                         //Lógica de tipo de carta
                         if (tokens[j].Value == "Type")
                         {
@@ -231,6 +245,8 @@ public class Parser
                                 exceptions.Add(new Exceptions("Error ,faltan los 2 puntos en la declaración del tipo de carta", 0, 0));
                             }
                         }
+
+
                         //Lógica del nombre de la carta
                         else if (tokens[j].Value == "Name")
                         {
@@ -250,6 +266,8 @@ public class Parser
                                 exceptions.Add(new Exceptions("Error ,faltan los 2 puntos en la declaración del nombre de la carta", 0, 0));
                             }
                         }
+
+
                         //Lógica de la facción de la carta
                         else if (tokens[j].Value == "Faction")
                         {
@@ -269,6 +287,8 @@ public class Parser
                                 exceptions.Add(new Exceptions("Error ,faltan los 2 puntos en la declaración de la facción de la carta", 0, 0));
                             }
                         }
+
+
                         //Lógica del poder de la carta
                         else if (tokens[j].Value == "Power")
                         {
@@ -288,6 +308,7 @@ public class Parser
                                 exceptions.Add(new Exceptions("Error ,faltan los 2 puntos en la declaración del poder de la carta", 0, 0));
                             }
                         }
+
 
                         //Lógica del rango de la carta
                         else if (tokens[j].Value == "Range")
@@ -331,7 +352,9 @@ public class Parser
                 }
             }
         }
-        //Caso de efecto abstracto de la carta
+
+
+        //Lógica para guardar la lista de tokens del efecto de la carta
         else if (tokens[i].Value == "OnActivation")
         {
             List<Token> Aux = new List<Token>();
@@ -363,6 +386,8 @@ public class Parser
         }
         return 0;
     }
+
+    //Método para verificar el rango que tiene un token 
     public void AddRange(Token token,Card card)
     {
         switch (token.Value)

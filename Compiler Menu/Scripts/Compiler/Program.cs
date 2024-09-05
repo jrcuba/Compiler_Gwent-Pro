@@ -29,7 +29,6 @@ public class Program : MonoBehaviour
         int visitant = 0;
         string texto = "";
         tokens = Lexer.Tokenize(InputField.text,exceptions);
-        
         //foreach (Token token in tokens)
         //{
         //    texto += token.Key + "\n";

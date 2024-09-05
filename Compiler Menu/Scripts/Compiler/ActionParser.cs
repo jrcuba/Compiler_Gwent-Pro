@@ -15,7 +15,6 @@ public class ActionParser
         }
         else if (tokens[i].Value == "target")
         {
-            //hay una serie de posibilidades con la carta ,acceso a propiedad ,acceso a ella misma ,igualarle alguna propiedad,por ahora solo se el acceso a propiedad y retornarla a ella misma asi que eso haré
             if (tokens[i + 1].Value == ".")
             {
                 switch(tokens[i + 2].Value) 

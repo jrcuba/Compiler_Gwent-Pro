@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 public class Lexer
 {
-    //método que devuelve una lista de tokens a partir del string de entrada 
+    //método que devuelve una lista de tokens a partir del string de entrada
     public List<Token> Tokenize(string input, List<Exceptions> exceptions)
     {
         //lista de tokens vacía que se va a retornar
@@ -13,6 +13,8 @@ public class Lexer
         int lineNumber = 1;
         int columnNumber = 0;
 
+
+        //Bucle para buscar el tipo de token usando expresiones regulares
         foreach (Match match in Regex.Matches(input, @"""([^""\\]*(?:\\.[^""\\]*)*)""|'([^'\\]*(?:\\.[^'\\]*)*)'|[\wñÑáéíóúÁÉÍÓÚ]+|[^a-zA-Z0-9\s]"))
         {
             string value = match.Value;//guardo el valor de la expresión regular
@@ -34,7 +36,7 @@ public class Lexer
                 //agregar a la lista de errores un nuevo error en esa linea y columna
                 exceptions.Add(new Exceptions("Token No reconocido", columnNumber, lineNumber));
             }
-            //manejo las filas y las columnas ,fin
+            //manejo las filas y las columnas
             columnNumber += value.Length;
             if (match.Index > 0 && input[match.Index - 1] == '\n')
             {
@@ -42,6 +44,7 @@ public class Lexer
                 columnNumber = 0;
             }
         }
+        //devuelve la lista de tokens
         return tokens;
     }
 }
