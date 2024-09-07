@@ -13,6 +13,8 @@ public class ActionParser
         {
             return ActionContext(card, tokens, Targets, context, ref Params, i,ref exceptions);
         }
+
+        //Casos específicos para manejo de bucles 
         else if (tokens[i].Value == "target")
         {
             if (tokens[i + 1].Value == ".")
@@ -133,6 +135,7 @@ public class ActionParser
                                 }
                                 auxlist.Add(tokens[k]);
                             }
+
                             foreach (List<Card> targets in Targets)
                             {
                                 foreach (Card target in targets)
@@ -807,7 +810,7 @@ public class ActionParser
                     case "Name":
                         if (tokens[position + 3].Key == "STRING")
                         {
-                            if (card.Name == tokens[position + 3].Value)
+                            if (card.CardName == tokens[position + 3].Value)
                             {
                                 return true;
                             }

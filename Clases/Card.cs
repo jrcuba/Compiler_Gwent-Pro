@@ -6,7 +6,7 @@ public class Card : MonoBehaviour
     public string PlayerAlQuePertenece { get; set; }
     public string SpecialType { get;set; }//Gold o Silver
     public string Type { get; set; }//Effect o Monster o Líder
-    public string Name { get; set; }
+    public string CardName { get; set; }
     public string Faction { get; set; }
     public double Power { get; set; }
     public List<string> Range {  get; set; }
@@ -16,7 +16,7 @@ public class Card : MonoBehaviour
     public static Card CreateCard(GameObject parent, string name, double power, string type, string faction, List<string> range, Player player,string EffectName)
     {
         Card newCard = parent.AddComponent<Card>();
-        newCard.Name = name;
+        newCard.CardName = name;
         newCard.Power = power;
         newCard.Type = type;
         newCard.Faction = faction;
@@ -32,7 +32,7 @@ public class Card : MonoBehaviour
         EffectName = "";
         SpecialType = "";
         Type = "";
-        Name = "";
+        CardName = "";
         Faction = "";
         PlayerAlQuePertenece = "";
         Power = 0;

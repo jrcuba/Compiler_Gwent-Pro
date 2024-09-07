@@ -49,6 +49,7 @@ public class SystemMouseMover : MonoBehaviour
                 {
                     if (SummonScript.InvoquedCardsPlayer2.Count < 4)
                     {
+                        int position = 0;
                         if (!FirstMovement)
                         {
                             cards = new List<GameObject>();
@@ -57,7 +58,7 @@ public class SystemMouseMover : MonoBehaviour
                         }
                         else if (!SecondMovement)
                         {
-                            int position = VerificateCardWithLowerPower();
+                            position = VerificateCardWithLowerPower();
                             GetPosition(position);
                             cards.RemoveAt(position);
                             SecondMovement = true;
@@ -69,7 +70,7 @@ public class SystemMouseMover : MonoBehaviour
                         }
                         else if (!CuartoMovimiento)
                         {
-                            int position = VerificateCardWithLowerPower();
+                            position = VerificateCardWithLowerPower();
                             GetPosition(position);
                             CuartoMovimiento = true;
                         }
@@ -81,15 +82,135 @@ public class SystemMouseMover : MonoBehaviour
                         }
                         else if (SextoMovimiento)
                         {
-                            int position = VerificateCardWithMorePower();
+                            position = VerificateCardWithMorePower();
                             GetPosition(position);
                             SextoMovimiento = false;
                         }
                         else if (SectimoMovimiento)
                         {
-                            ClickMouse((uint)targetPosition.x, (uint)targetPosition.y);
-                            SectimoMovimiento = false;
-                            isMoving = false;
+                            //antes de dar click tengo que verificar si se puede invocar ,si no se puede tengo que buscar otra carta e invocarla
+                            int k = -1;
+                            Card card = cards[position].GetComponent<Card>();
+                            if (card.PlayerAlQuePertenece == SelectDeckScript.players[0].Id)
+                            {
+                                k = 0;
+                            }
+                            else
+                            {
+                                k = 1;
+                            }
+                            foreach (var range in card.Range)
+                            {
+                                switch (range) 
+                                {
+                                    case "Melee":
+                                        if (k == 0)
+                                        {
+                                            if (SummonScript.CardsOnMeleePlayer1.Count < 2)
+                                            {
+                                                ClickMouse((uint)targetPosition.x, (uint)targetPosition.y);
+                                                SectimoMovimiento = false;
+                                                isMoving = false;
+                                            }
+                                            else
+                                            {
+                                                //elimino la carta de la lista de cartas 
+                                                cards.RemoveAt(position);
+                                            }
+                                        }
+                                        else if (k == 1)
+                                        {
+                                            if (SummonScript.CardsOnMeleePlayer2.Count < 2)
+                                            {
+                                                ClickMouse((uint)targetPosition.x, (uint)targetPosition.y);
+
+                                                SectimoMovimiento = false;
+                                                isMoving = false;
+                                            }
+                                            else
+                                            {
+                                                cards.RemoveAt(position);
+                                            }
+                                        }
+                                        break;
+                                    case "Ranged":
+                                        if (k == 0)
+                                        {
+                                            if (SummonScript.CardsOnRangedPlayer1.Count < 2)
+                                            {
+                                                ClickMouse((uint)targetPosition.x, (uint)targetPosition.y);
+
+                                                SectimoMovimiento = false;
+                                                isMoving = false;
+                                            }
+                                            else
+                                            {
+                                                //elimino la carta de la lista de cartas 
+                                                cards.RemoveAt(position);
+                                            }
+                                        }
+                                        else if (k == 1)
+                                        {
+                                            if (SummonScript.CardsOnRangedPlayer2.Count < 2)
+                                            {
+                                                ClickMouse((uint)targetPosition.x, (uint)targetPosition.y);
+
+                                                SectimoMovimiento = false;
+                                                isMoving = false;
+                                            }
+                                            else
+                                            {
+                                                cards.RemoveAt(position);
+                                            }
+                                        }
+                                        break;
+                                    case "Siege":
+                                        if (k == 0)
+                                        {
+                                            if (SummonScript.CardsOnSiegePlayer1.Count < 2)
+                                            {
+                                                ClickMouse((uint)targetPosition.x, (uint)targetPosition.y);
+
+                                                SectimoMovimiento = false;
+                                                isMoving = false;
+                                            }
+                                            else
+                                            {
+                                                //elimino la carta de la lista de cartas 
+                                                cards.RemoveAt(position);
+                                            }
+                                        }
+                                        else if (k == 1)
+                                        {
+                                            if (SummonScript.CardsOnSiegePlayer2.Count < 2)
+                                            {
+                                                ClickMouse((uint)targetPosition.x, (uint)targetPosition.y);
+
+                                                SectimoMovimiento = false;
+                                                isMoving = false;
+                                            }
+                                            else
+                                            {
+                                                cards.RemoveAt(position);
+                                            }
+                                        }
+                                        break;
+                                    default:
+                                        //dirijirse a la posición del botón y pasar
+                                        if (!OctavoMovimiento)
+                                        {
+                                            targetPosition = new Vector3(1800, 1000, 0);
+                                            OctavoMovimiento = true;
+                                        }
+                                        else if (!NovenoMovimiento)
+                                        {
+                                            ClickMouse((uint)targetPosition.x, (uint)targetPosition.y);
+                                            NovenoMovimiento = true;
+                                            isMoving = false;
+                                        }
+                                        break;
+                                }
+                            }
                         }
                     }
                     else

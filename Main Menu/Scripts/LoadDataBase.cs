@@ -31,16 +31,16 @@ public class LoadDataBase : MonoBehaviour
             int instances = GetInstanceCount(type, "Humanos");
             for (int i = 0; i < instances; i++)
             {
-                if ( (i + 1) % 2 == 0)
+                if ((i + 1) % 2 == 0 || (i + 2) % 3 == 0 || (i + 5) % 2 == 0)
                 {
-                    Card newCard = Card.CreateCard(cardParent, "Silver", Random.Range(1, 10), "Monster", type, new List<string> { "Melee","Ranged","Siege" }, new Player(new List<Card>(), type + i), "");
+                    Card newCard = Card.CreateCard(cardParent, type, Random.Range(1, 10), "Monster", "Humans", new List<string> { "Melee","Ranged","Siege" }, new Player(new List<Card>(), type + i), "");
                     newCard.Image = LoadCardImage(type);
                     AssignEffectName(newCard);
                     deck1Cards.Add(newCard);
                 }
                 else
                 {
-                    Card newCard = Card.CreateCard(cardParent, "Silver", Random.Range(1, 10), "Effect", type, new List<string> { "Melee", "Ranged", "Siege" }, new Player(new List<Card>(), type + i), "");
+                    Card newCard = Card.CreateCard(cardParent, type, 5, "Monster", "Humans", new List<string> { "Melee", "Ranged", "Siege" }, new Player(new List<Card>(), type + i), "");
                     newCard.Image = LoadCardImage(type);
                     AssignEffectName(newCard);
                     deck1Cards.Add(newCard);
@@ -57,16 +57,16 @@ public class LoadDataBase : MonoBehaviour
             int instances = GetInstanceCount(type, "Orcos");
             for (int i = 0; i < instances; i++)
             {
-                if ( (i + 1) % 2 == 0)
+                if ( (i + 1) % 2 == 0 || (i + 2) % 3 == 0 || (i + 5) % 2 == 0)
                 {
-                    Card newCard = Card.CreateCard(cardParent, "Silver", Random.Range(1, 10), "Monster", type, new List<string> { "Melee","Ranged","Siege" }, new Player(new List<Card>(), type + i), "");
+                    Card newCard = Card.CreateCard(cardParent, type, Random.Range(1, 10), "Monster","Orcos", new List<string> { "Melee","Ranged","Siege" }, new Player(new List<Card>(), type + i), "");
                     newCard.Image = LoadCardImage(type);
                     AssignEffectName(newCard);
                     deck2Cards.Add(newCard);
                 }
                 else
                 {
-                    Card newCard = Card.CreateCard(cardParent, "Silver", Random.Range(1, 10), "Effect", type, new List<string> { "Melee", "Ranged", "Siege" }, new Player(new List<Card>(), type + i), "");
+                    Card newCard = Card.CreateCard(cardParent, type, 5, "Monster", "Orcos", new List<string> { "Melee", "Ranged", "Siege" }, new Player(new List<Card>(), type + i), "");
                     newCard.Image = LoadCardImage(type);
                     AssignEffectName(newCard);
                     deck2Cards.Add(newCard);
@@ -160,24 +160,103 @@ public class LoadDataBase : MonoBehaviour
 
     private void AssignEffectName(Card card)
     {
-        //aquí le voy a dar los poderes a las cartas
-        switch (card.Type)
+        List<string> effects = new List<string>
+    {
+        "PutIncrease",
+        "DeleteMostPowerfullCard",
+        "DeleteMostWeakCard",
+        "GetScalarAttack",
+        "DeleteFile",
+        "RestartPower"
+    };
+        switch (card.CardName)
         {
             case "Mago":
-                card.EffectName = "";
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
                 break;
             case "Guerrero":
-                card.EffectName = "";
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
                 break;
             case "Arquero":
-                card.EffectName = "";
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
                 break;
             case "Caballero":
-                card.EffectName = "";
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
                 break;
-            // Agrega más casos según sea necesario
+            case "Hechicero":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Lancero":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Espía":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Asesino":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Mercenario":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Sacerdote":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Berserker":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Alquimista":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Explorador":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Líder":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Orco":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Orco Chamán":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Orco Guerrero":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Orco Berserker":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Orco Cazador":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Orco Jinete":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Orco Brujo":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Orco Asesino":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Orco Espía":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Orco Mercenario":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Orco Sacerdote":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Orco Alquimista":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Orco Explorador":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
+            case "Orco Líder":
+                card.EffectName = effects[UnityEngine.Random.Range(0, effects.Count)];
+                break;
             default:
-                card.EffectName = "";
+                card.EffectName = "Candela";
                 break;
         }
     }

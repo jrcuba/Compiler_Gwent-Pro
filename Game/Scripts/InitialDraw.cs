@@ -95,7 +95,7 @@ public class GameControllerScript : MonoBehaviour
             {
                 cardComponent.PlayerAlQuePertenece = card.PlayerAlQuePertenece;
                 cardComponent.Type = card.Type;
-                cardComponent.Name = card.Name;
+                cardComponent.CardName = card.CardName;
                 cardComponent.Faction = card.Faction;
                 cardComponent.Power = card.Power;
                 cardComponent.Range = new List<string>(card.Range);

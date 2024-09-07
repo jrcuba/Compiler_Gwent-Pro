@@ -254,7 +254,7 @@ public class Parser
                             {
                                 if (tokens[j + 2].Key == "STRING")
                                 {
-                                    cards[cards.Count - 1].Name = tokens[j + 2].Value;
+                                    cards[cards.Count - 1].CardName = tokens[j + 2].Value;
                                 }
                                 else
                                 {

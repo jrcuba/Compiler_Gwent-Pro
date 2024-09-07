@@ -19,6 +19,8 @@ public class Show : MonoBehaviour
     public Text text12;
     public Text text13;
     public Text text14;
+    public Text text15;
+    public Text text16;
     public Image image1;
     public Image image2;
     public void Update()
@@ -30,6 +32,7 @@ public class Show : MonoBehaviour
         text9.text = text10.text;
         text11.text = text12.text;
         text13.text = text14.text;
+        text15.text = text16.text;
         image2.sprite = image1.sprite;
     }
 }

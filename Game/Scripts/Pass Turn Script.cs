@@ -23,6 +23,7 @@ public class PassTurnScript : MonoBehaviour
                     {
                         RoundPassCount++;
                         SummonScript.count++;
+                        EffectsNoCompilables.PutIncreaseBool = false;
                         if (SummonScript.IsplayinWithIa)
                         {
                             SummonScript.IsPlayingWithIaMethod();
@@ -39,6 +40,7 @@ public class PassTurnScript : MonoBehaviour
                         {
                             SummonScript.count = 5;
                             SummonScript.RoundsWinsPlayer2++;
+
                             if (SummonScript.IsplayinWithIa)
                             {
                                 SummonScript.IsPlayingWithIaMethod();
@@ -81,6 +83,8 @@ public class PassTurnScript : MonoBehaviour
                             Destroy(aux);
                         }
 
+                        EffectsNoCompilables.PutIncreaseBool = false;
+
                         SummonScript.RoundCount++;
                         SummonScript.count++;
                         RoundPassCount = 0;
@@ -97,7 +101,7 @@ public class PassTurnScript : MonoBehaviour
                         SummonScript.CardsOnRangedPlayer2 = new List<Card>();
                         SummonScript.CardsOnSiegePlayer1 = new List<Card>();
                         SummonScript.CardsOnSiegePlayer2 = new List<Card>();
-
+                        Debug.Log(SummonScript.CardsOnMeleePlayer1.Count);
                         if (SummonScript.CantCardsInHandPlayer1 <= 9)
                         {
                             if (SummonScript.CantCardsInHandPlayer1 == 9)
@@ -132,6 +136,7 @@ public class PassTurnScript : MonoBehaviour
                 {
                     if (RoundPassCount == 0)
                     {
+                        EffectsNoCompilables.PutIncreaseBool = false;
                         RoundPassCount++;
                         SummonScript.count++;
                     }
@@ -191,6 +196,8 @@ public class PassTurnScript : MonoBehaviour
                             SummonScript.CementeryPlayer2Object.Add(aux);
                             Destroy(aux);
                         }
+
+                        EffectsNoCompilables.PutIncreaseBool = false;
 
                         SummonScript.RoundCount++;
                         RoundPassCount = 0;

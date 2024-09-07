@@ -115,6 +115,7 @@ MonoBehaviour:
   TypeField: {fileID: 3329904880247108409, guid: 3e3cddad8bbf1d243a837be913555baa, type: 3}
   PowerField: {fileID: 3348875797302544891, guid: f032c76f17288c541b073c7d6368cbec, type: 3}
   FactionField: {fileID: 8777174974651348193, guid: e64244021db67854a8e1708ba0a22cf5, type: 3}
+  EffectNameField: {fileID: 8785385151529712497, guid: 70bd8e852ba92cf468945dd38ec64d93, type: 3}
   image: {fileID: 6933135663658931671, guid: 039ab5ad14e7e1541a8d97857695f57a, type: 3}
 --- !u!61 &5516707945770784781
 BoxCollider2D:

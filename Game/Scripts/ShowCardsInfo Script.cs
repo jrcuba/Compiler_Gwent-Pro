@@ -11,6 +11,7 @@ public class ShowCardsInfoScript : MonoBehaviour
     public Text TypeField;
     public Text PowerField;
     public Text FactionField;
+    public Text EffectNameField;
     public Image image;
     void OnMouseEnter()
     {
@@ -18,12 +19,12 @@ public class ShowCardsInfoScript : MonoBehaviour
         if (card != null)
         {
             TypeField.text = card.Type;
-            NameField.text = card.Name;
+            NameField.text = card.CardName;
             PowerField.text = card.Power.ToString();
             FactionField.text = card.Faction;
             RangeField.text = string.Join(", ", card.Range);
+            EffectNameField.text = card.EffectName;
             image.sprite = gameObject.GetComponent<Image>().sprite;
-            //Debug.Log("Owner: " + card.Owner());
         }
         if (!SystemMouseMover.cards.Contains(gameObject) && SelectDeckScript.players[1].Id == card.PlayerAlQuePertenece)
         {
