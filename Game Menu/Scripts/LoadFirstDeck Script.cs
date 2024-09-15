@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+//Método que me carga los decks que tengo guardados en la base de datos 
 public class LoadFirstDeck : MonoBehaviour
 {
     public Text Text;

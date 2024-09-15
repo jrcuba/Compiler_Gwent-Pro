@@ -6,8 +6,6 @@ using UnityEngine.UI;
 
 public class Program : MonoBehaviour
 {
-
-
     public Text text;
     public InputField InputField;
     
@@ -29,10 +27,7 @@ public class Program : MonoBehaviour
         int visitant = 0;
         string texto = "";
         tokens = Lexer.Tokenize(InputField.text,exceptions);
-        //foreach (Token token in tokens)
-        //{
-        //    texto += token.Key + "\n";
-        //}
+
         if (visitant < tokens.Count)
         {
             parser.ReadTokens(tokens,visitant,ref exceptions,ref effects,ref cards);
@@ -43,5 +38,6 @@ public class Program : MonoBehaviour
         }
         text.text = texto;
         exceptions = new List<Exceptions>();
+        //TODO : arreglar ligero error en excepción de rango
     }
 }

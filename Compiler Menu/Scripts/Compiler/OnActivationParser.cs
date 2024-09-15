@@ -4,24 +4,29 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 using System;
-public class OnActivationParser
+using System.Runtime.CompilerServices;
+public class OnActivationParser : MonoBehaviour 
 {
+
+
+    private bool VerificatePredicateBoolPostAction = true;
+    private bool VerificatePredicateBool = true;
+    private bool VerificatetargetSingle = true;
+    private bool VerificatetargetPostActionSingle = true;
+
     public ActionParser _actionParser = new ActionParser();
-    public List<Token> actionTokens = new List<Token>();
+
     public List<Token> PostActionTokens = new List<Token>();
     public Effect effect = new Effect();
     public Effect effectPostAction = new Effect();
     public List<List<Card>> Targets = new List<List<Card>>();
     public List<List<Card>> TargetsPostAction = new List<List<Card>>();
-    public bool Single = false;
-    public bool SinglePostAction = false;
+    public bool Single;
+    public bool SinglePostAction;
     public object OnActivation(List<Token> tokens, List<Effect> effects, Card card,ref List<Exceptions> exceptions, int i = 0)
     {
-        
-
+        //efecto principal
         if (i < tokens.Count) {
-
-
             //Lectura directa del efecto dentro del OnActivation
             if (tokens[i].Value == "Effect")
             {
@@ -29,7 +34,6 @@ public class OnActivationParser
                 {
                     if (tokens[i + 2].Key == "STRING")
                     {
-
                         //Busca sí está el efecto dentro de la lista de efectos y lo pone como efecto principal si existe
                         VerificateEffectName(tokens, i + 2, effects, ref exceptions,ref effect);
 
@@ -60,48 +64,51 @@ public class OnActivationParser
                             }
                         }
                     }
-                    //Lo mismo que arriba pero en un caso diferente ,carga los parámetros y el nombre
-                    else if (tokens[1 + 2].Value == "{")
+                    else
                     {
-                        for (int k = i + 3;k < tokens.Count; k++) 
+                        if (tokens[i + 2].Value == "{")
                         {
-                            //Busqueda de nombre del efecto
-                            if (tokens[k].Value == "Name")
+                            for (int k = i + 3; k < tokens.Count; k++)
                             {
-                                VerificateEffectName(tokens, k, effects, ref exceptions,ref effect);
-                            }
-
-
-                            //buscar en la lista de parámetros del efecto que debe haber sido previamente cargado
-                            else if (tokens[k].Key == "PALABRA") 
-                            {
-                                foreach (Params @params in effect.Params)
+                                //Busqueda de nombre del efecto
+                                if (tokens[k].Value == "Name")
                                 {
-                                    if (@params.Name == tokens[k].Value)
-                                    {
-                                        //realizar la acción
-                                        if (tokens[k + 1].Value == ":")
-                                        {
-                                            //TODO: tengo que verificar el tokens[k + 2].value
-                                            @params.Value = tokens[k + 2].Value;
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            exceptions.Add(new Exceptions("Error ,faltan los : en la declaración del parámetro", 0, 0));
-                                        }
+                                    VerificateEffectName(tokens, k, effects, ref exceptions, ref effect);
+                                }
 
+
+                                //buscar en la lista de parámetros del efecto que debe haber sido previamente cargado
+                                else if (tokens[k].Key == "PALABRA")
+                                {
+                                    foreach (Params @params in effect.Params)
+                                    {
+                                        if (@params.Name == tokens[k].Value)
+                                        {
+                                            //realizar la acción
+                                            if (tokens[k + 1].Value == ":")
+                                            {
+                                                //TODO: tengo que verificar el tokens[k + 2].value
+                                                @params.Value = tokens[k + 2].Value;
+                                                break;
+                                            }
+                                            else
+                                            {
+                                                exceptions.Add(new Exceptions("Error ,faltan los : en la declaración del parámetro", 0, 0));
+                                            }
+
+                                        }
                                     }
                                 }
-                            }
-                            else if (tokens[k].Value == "}")
-                            {
-                                break;
+                                else if (tokens[k].Value == "}")
+                                {
+                                    break;
+                                }
                             }
                         }
                     }
                 }
             }
+
             //Selector
             else if (tokens[i].Value == "Selector")
             {
@@ -115,24 +122,26 @@ public class OnActivationParser
                     if (tokens[i + 2].Value == "{")
                     {
                         //Recorro los tokens correspondientes dentro del Selector
-
                         for (int k = i + 3; k < tokens.Count; k++)
                         {
                             //Source
                             if (tokens[k].Value == "Source")
                             {
-                                SourceVerificator(tokens,k,ref exceptions,v);
+                                SourceVerificator(tokens, k, ref exceptions, v, ref Targets);
                             }
                             //Single
                             else if (tokens[k].Value == "Single")
                             {
-                                SingleVerificator(tokens,k,ref Single);
+                                SingleVerificator(tokens, k, ref Single,ref VerificatetargetSingle);
                             }
-
                             //Predicate
                             else if (tokens[k].Value == "Predicate")
                             {
-                                VerificatePredicate(tokens,k,ref exceptions,ref Targets);
+                                VerificatePredicate(tokens,k,ref exceptions,ref Targets,ref VerificatePredicateBool,ref Single);
+                            }
+                            else if (tokens[k].Value == "PostAction")
+                            {
+                                break;
                             }
                         }
                     }
@@ -146,7 +155,6 @@ public class OnActivationParser
                     exceptions.Add(new Exceptions("Error ,faltan los : en la declaración del parámetro", 0, 0));
                 }
             }
-
 
             //PostAction
             else if (tokens[i].Value == "PostAction")
@@ -179,24 +187,20 @@ public class OnActivationParser
                                             //Source
                                             if (tokens[j].Value == "Source")
                                             {
-                                                SourceVerificator(tokens,j,ref exceptions,v);
+                                                SourceVerificator(tokens,j,ref exceptions,v, ref TargetsPostAction);
                                             }
 
                                             //Single
                                             else if (tokens[j].Value == "Single")
                                             {
-                                                SingleVerificator(tokens, j,ref SinglePostAction);
+                                                SingleVerificator(tokens, j,ref SinglePostAction,ref VerificatetargetPostActionSingle);
                                             }
 
 
-                                            //TODO: tengo que hacer el predicado de PostAction también
+                                            //Predicate
                                             else if (tokens[j].Value == "Predicate")
                                             {
-                                                VerificatePredicate(tokens, j,ref exceptions,ref TargetsPostAction);
-                                            }
-                                            if (tokens[j].Value == "}")
-                                            {
-                                                break;
+                                                VerificatePredicate(tokens, j,ref exceptions,ref TargetsPostAction, ref VerificatePredicateBoolPostAction, ref SinglePostAction);
                                             }
                                         }
                                     }
@@ -267,7 +271,7 @@ public class OnActivationParser
     }
 
     //Método para verificar el Source
-    private void SourceVerificator(List<Token> tokens,int j ,ref List<Exceptions> exceptions,int v)
+    private void SourceVerificator(List<Token> tokens,int j ,ref List<Exceptions> exceptions,int v,ref List<List<Card>> targets)
     {
         if (v == 0 || v == 1)
         {
@@ -275,7 +279,7 @@ public class OnActivationParser
             {
                 if (tokens[j + 2].Key == "STRING")
                 {
-                    AddToTargetList(tokens, j + 2, v, ref TargetsPostAction);
+                    AddToTargetList(tokens, j + 2, v, ref targets);
                     j = j + 3;
                 }
                 else
@@ -296,22 +300,23 @@ public class OnActivationParser
 
     //Método Verificador del Single
 
-    private void SingleVerificator(List<Token> tokens,int j,ref bool BoolToEdit)
+    private void SingleVerificator(List<Token> tokens,int j,ref bool single,ref bool verificatebool)
     {
-        if (tokens[j + 1].Value == ":")
+        if (tokens[j + 1].Value == ":" && verificatebool)
         {
             if (tokens[j + 2].Value == "true")
             {
-                BoolToEdit = true;
+                single = true;
             }
             else if (tokens[j + 2].Value == "false")
             {
-                BoolToEdit = false;
+                single = false;
             }
+            verificatebool = false;
         }
     }
     //Método verificador de predicado
-    private void VerificatePredicate(List<Token> tokens,int j,ref List<Exceptions> exceptions,ref List<List<Card>> targets)
+    private void VerificatePredicate(List<Token> tokens,int j,ref List<Exceptions> exceptions,ref List<List<Card>> targets,ref bool verificatedbool,ref bool single)
     {
         if (tokens[j + 1].Value == ":")
         {
@@ -327,14 +332,34 @@ public class OnActivationParser
                             {
                                 foreach (List<Card> cards in targets)
                                 {
-                                    for (int r = cards.Count - 1; r >= 0; r--)
+                                    if (verificatedbool)
                                     {
-                                        bool aux = PredicateCompiler(tokens, j + 7, ref exceptions, cards[r]);
-                                        if (!aux)
+                                        if (!single)
                                         {
-
-                                            cards.RemoveAt(r); // Elimina el elemento en la posición r  
+                                            for (int r = cards.Count - 1; r >= 0; r--)
+                                            {
+                                                bool aux = PredicateCompiler(tokens, j + 7, ref exceptions, cards[r]);
+                                                if (!aux)
+                                                {
+                                                    cards.RemoveAt(r);
+                                                }
+                                            }
                                         }
+                                        else
+                                        {
+                                            if (cards.Count > 0)
+                                            {
+                                                Card auxcard = cards[0];
+                                                bool aux = PredicateCompiler(tokens, j + 7, ref exceptions, cards[0]);
+                                                cards.Clear();
+                                                if (aux)
+                                                { 
+                                                    cards.Add(auxcard); 
+                                                }
+                                            }
+
+                                        }
+                                        VerificatePredicateBool = false;
                                     }
                                 }
                             }
@@ -375,7 +400,7 @@ public class OnActivationParser
         //Veo que los tipos de objetivos que puede tener
         switch (tokens[position].Value)
         {
-            case ("'board'"):
+            case "'board'":
                 targets.Add(SummonScript.InvoquedCards);
                 break;
             case "'hand'":
@@ -411,10 +436,9 @@ public class OnActivationParser
                 }
                 break;
             case "'Parent'":
-                targets = Targets;
+                targets = Targets;//va a tener la misma lista de objetivos que el padre ,o sea va a tener otro filtro el proximo efecto
                 break;
             default:
-                Debug.Log("El objetivo no es válido");
                 break;
         }
     }

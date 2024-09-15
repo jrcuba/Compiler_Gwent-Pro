@@ -1,11 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//Una base de datos básica para probar mi juego 
 public class LoadDataBase : MonoBehaviour
 {
     public static Dictionary<string, List<Card>> Mazos = new Dictionary<string, List<Card>>();
     private static int count = 0;
-
+    private static int count2 = 0;
     void Start()
     {
         if (count == 0)
@@ -31,7 +32,7 @@ public class LoadDataBase : MonoBehaviour
             int instances = GetInstanceCount(type, "Humanos");
             for (int i = 0; i < instances; i++)
             {
-                if ((i + 1) % 2 == 0 || (i + 2) % 3 == 0 || (i + 5) % 2 == 0)
+                if (count2 % 4 != 0)
                 {
                     Card newCard = Card.CreateCard(cardParent, type, Random.Range(1, 10), "Monster", "Humans", new List<string> { "Melee","Ranged","Siege" }, new Player(new List<Card>(), type + i), "");
                     newCard.Image = LoadCardImage(type);
@@ -40,11 +41,12 @@ public class LoadDataBase : MonoBehaviour
                 }
                 else
                 {
-                    Card newCard = Card.CreateCard(cardParent, type, 5, "Monster", "Humans", new List<string> { "Melee", "Ranged", "Siege" }, new Player(new List<Card>(), type + i), "");
+                    Card newCard = Card.CreateCard(cardParent, type, 5, "Effect", "Humans", new List<string> { "Melee", "Ranged", "Siege" }, new Player(new List<Card>(), type + i), "");
                     newCard.Image = LoadCardImage(type);
                     AssignEffectName(newCard);
                     deck1Cards.Add(newCard);
                 }
+                count2++;
             }
         }
 
@@ -57,7 +59,7 @@ public class LoadDataBase : MonoBehaviour
             int instances = GetInstanceCount(type, "Orcos");
             for (int i = 0; i < instances; i++)
             {
-                if ( (i + 1) % 2 == 0 || (i + 2) % 3 == 0 || (i + 5) % 2 == 0)
+                if (count2 % 4 != 0)
                 {
                     Card newCard = Card.CreateCard(cardParent, type, Random.Range(1, 10), "Monster","Orcos", new List<string> { "Melee","Ranged","Siege" }, new Player(new List<Card>(), type + i), "");
                     newCard.Image = LoadCardImage(type);
@@ -66,11 +68,12 @@ public class LoadDataBase : MonoBehaviour
                 }
                 else
                 {
-                    Card newCard = Card.CreateCard(cardParent, type, 5, "Monster", "Orcos", new List<string> { "Melee", "Ranged", "Siege" }, new Player(new List<Card>(), type + i), "");
+                    Card newCard = Card.CreateCard(cardParent, type, 5, "Effect", "Orcos", new List<string> { "Melee", "Ranged", "Siege" }, new Player(new List<Card>(), type + i), "");
                     newCard.Image = LoadCardImage(type);
                     AssignEffectName(newCard);
                     deck2Cards.Add(newCard);
                 }
+                count2++;
             }
         }
 

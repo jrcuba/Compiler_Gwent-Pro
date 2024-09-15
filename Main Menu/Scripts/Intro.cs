@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
+//Clase con un ligero mensaje de bienvenida que se muestra al principio del juego 
 public class Intro : MonoBehaviour
 {
     static int Started = 0;

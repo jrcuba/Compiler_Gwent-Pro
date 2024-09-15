@@ -3,213 +3,251 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
-public class ActionParser
+using System.Security.Cryptography;
+using static Unity.Burst.Intrinsics.X86;
+using System.Linq;
+using static UnityEngine.GraphicsBuffer;
+public class ActionParser : MonoBehaviour 
 {
+    public GameObject CardPrefab;
+    public Transform HandPlayer1;
+    public Transform HandPlayer2;
+    SummonScript summonScript = new SummonScript();
     GameControllerScript gameControllerScript = new GameControllerScript();
     public object ActionParser_(Card card, List<Token> tokens, List<List<Card>> Targets, Context context, ref List<Params> Params, int i,ref List<Exceptions> exceptions)
     {
-        //Casos de manejo de propiedades    
-        if (tokens[i].Value == "context")
+        if (i < tokens.Count)
         {
-            return ActionContext(card, tokens, Targets, context, ref Params, i,ref exceptions);
-        }
-
-        //Casos específicos para manejo de bucles 
-        else if (tokens[i].Value == "target")
-        {
-            if (tokens[i + 1].Value == ".")
+        //Casos de manejo de propiedades
+            if (tokens[i].Value == "context")
             {
-                switch(tokens[i + 2].Value) 
-                {
-                    case "Owner":
-                        return card.Owner();
-                    case "Power":
-                        if (tokens[i + 4].Value == "=")
-                        {
-                            if (tokens[i +3].Value == "=")
-                            {
-                                card.Power = (double)ActionParser_(card,tokens,Targets,context,ref Params,i + 5,ref exceptions);
-                            }
-                            else if (tokens[i + 4].Value == "+")
-                            {
-                                card.Power += (double)ActionParser_(card, tokens, Targets, context, ref Params, i + 5, ref exceptions);
-                            }
-                            else if (tokens[i + 4].Value == "-")
-                            {
-                                card.Power -= (double)ActionParser_(card, tokens, Targets, context, ref Params, i + 5, ref exceptions);
-                            }
-                        }
-                        else
-                        {
-                            return card.Power;
-                        }
-                        break;
-                    default:
-                        break;
-                }
+                return ActionContext(card, tokens, Targets, context, ref Params, i,ref exceptions);
             }
-        }
-        //Casos de variables
-        else if (tokens[i].Key == "PALABRA")
-        {
-           if (tokens[i + 1].Value == "=")
-             {
-                int aux = ComprobateParam(tokens[i], ref Params);
-                //busco el punto y coma para diferenciar de linea 
-                List<Token> tokens1 = new List<Token>();
-                int index = tokens.Count - 1;
-                for (int k = i + 2; k < tokens.Count; k++)
+            //Casos específicos para manejo de bucles 
+            else if (tokens[i].Value == "target")
+            {
+                if (tokens[i + 1].Value == ".")
                 {
-                    tokens1.Add(tokens[k]);
-                    if (tokens[k].Value == ";")
+                    switch(tokens[i + 2].Value) 
                     {
-                        index = k;
-                        tokens1.Add(tokens[k]);
-                        break;
+                        case "Owner":
+                            return card.Owner();
+                        case "Power":
+                            if (tokens[i + 4].Value == "=")
+                            {
+                                if (tokens[i +3].Value == "=")
+                                {
+                                    //TODO: tengo que hacer que se actualicen los puntos
+                                    card.Power = int.Parse((string)ActionParser_(card, tokens, Targets, context, ref Params, i + 5, ref exceptions));
+                                }
+                                else if (tokens[i + 3].Value == "+")
+                                {
+                                    card.Power += int.Parse((string)ActionParser_(card, tokens, Targets, context, ref Params, i + 5, ref exceptions));
+                                    if (card.PlayerAlQuePertenece == SelectDeckScript.players[0].Id)
+                                    {
+                                        SummonScript.PowerPointsPlayer1 += int.Parse((string)ActionParser_(card, tokens, Targets, context, ref Params, i + 5, ref exceptions));
+                                    }
+                                    else
+                                    {
+                                        SummonScript.PowerPointsPlayer2 += int.Parse((string)ActionParser_(card, tokens, Targets, context, ref Params, i + 5, ref exceptions));
+                                    }
+                                }
+                                else if (tokens[i + 3].Value == "-")
+                                {
+                                    card.Power -= int.Parse((string)ActionParser_(card, tokens, Targets, context, ref Params, i + 5, ref exceptions));
+                                    if (card.PlayerAlQuePertenece == SelectDeckScript.players[0].Id)
+                                    {
+                                        SummonScript.PowerPointsPlayer1 -= int.Parse((string)ActionParser_(card, tokens, Targets, context, ref Params, i + 5, ref exceptions));
+                                    }
+                                    else
+                                    {
+                                        SummonScript.PowerPointsPlayer2 -= int.Parse((string)ActionParser_(card, tokens, Targets, context, ref Params, i + 5, ref exceptions));
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                return card.Power;
+                            }
+                            break;
+                        default:
+                            exceptions.Add(new Exceptions("Error ,no se reconoció el tipo de propiedad a acceder del target",0,0));
+                            break;
                     }
                 }
-                Params[aux].Value = ActionParser_(card, tokens1, Targets, context, ref Params, 0,ref exceptions);
-                for (int z = index; z >= i; z--)
-                {
-                    tokens.RemoveAt(z);
-                }
-                return ActionParser_(card, tokens, Targets, context, ref Params, i,ref exceptions);
             }
-            //TODO: caso de que no sea asignación con variable ,sino que sea sumar el valor de la variable
-            else if (tokens[i + 1].Key == "OPERADOR")
+            //Casos de variables
+            else if (tokens[i].Key == "PALABRA")
             {
-                ResolveOperator(card, tokens, Targets, context, ref Params, i, ref exceptions);
+               if (tokens[i + 1].Value == "=")
+               {
+                    int aux = ComprobateParam(tokens[i], ref Params);
+                    //busco el punto y coma para diferenciar de linea 
+                    List<Token> tokens1 = new List<Token>();
+                    int index = tokens.Count - 1;
+                    for (int k = i + 2; k < tokens.Count; k++)
+                    {
+                        tokens1.Add(tokens[k]);
+                        if (tokens[k].Value == ";")
+                        {
+                            index = k;
+                            tokens1.Add(tokens[k]);
+                            break;
+                        }
+                    }
+                    Params[aux].Value = ActionParser_(card, tokens1, Targets, context, ref Params, 0,ref exceptions);
+                    for (int z = index; z >= i; z--)
+                    {
+                        tokens.RemoveAt(z);
+                    }
+                    return ActionParser_(card, tokens, Targets, context, ref Params, i,ref exceptions);
+               }
+               else if (tokens[i + 1].Value == ".")
+               {
+                    int aux = ComprobateParam(tokens[i], ref Params);
+                    List<Card> cards = (List<Card>)Params[aux].Value;
+                    ActionsInListsOfContext(card,tokens,Targets,context,ref Params,i + 2,ref cards,ref exceptions);
+               }
+               else if (tokens[i + 1].Key == "OPERADOR")
+               {
+                   ResolveOperator(card, tokens, Targets, context, ref Params, i, ref exceptions);
+               }
+               else if (tokens[i + 1].Value == ";")
+               {
+                   int aux = Params.Count;
+                   int aux2 = ComprobateParam(tokens[i], ref Params);
+                   if (aux2 == Params.Count && aux2 != aux)
+                   {
+                       exceptions.Add(new Exceptions("Error ,la variable siguiente no está declarada como parámetro : " + tokens[i + 2].Value, 0,0));
+                   }
+                   else
+                   {
+                       tokens.RemoveAt(i + 1);
+                       tokens.RemoveAt(i);
+                       return Params[aux2].Value;
+                   }
+               }
+               else
+               {
+                   exceptions.Add(new Exceptions("Token no reconocido ,uso de variable incorrecta",0,0));
+               }
             }
-            else if (tokens[i + 1].Value == ";")
+            //Casos de números
+            else if (tokens[i].Key == "NUMERO")
             {
-                int aux = Params.Count;
-                int aux2 = ComprobateParam(tokens[i], ref Params);
-                if (aux2 == Params.Count && aux2 != aux)
+                //TODO: tengo que hacer el caso de que no sea un número el token[i + 2],sino una palabra o variable
+                if (tokens[i + 1].Key == "OPERADOR")
                 {
-                    exceptions.Add(new Exceptions("Error ,la variable siguiente no está declarada como parámetro : " + tokens[i + 2].Value, 0,0));
+                    ResolveOperator(card, tokens, Targets, context, ref Params, i, ref exceptions);
                 }
                 else
                 {
-                    tokens.RemoveAt(i + 1);
-                    tokens.RemoveAt(i);
-                    return Params[aux2].Value;
+                    return tokens[i].Value;
                 }
             }
-            else
+            //bucle for
+            else if (tokens[i].Value == "for")
             {
-                exceptions.Add(new Exceptions("Token no reconocido ,uso de variable incorrecta",0,0));
-            }
-        }
-        //Casos de números
-        else if (tokens[i].Key == "NUMERO")
-        {
-            //TODO: tengo que hacer el caso de que no sea un número el token[i + 2],sino una palabra o variable
-            if (tokens[i + 1].Key == "OPERADOR")
-            {
-                ResolveOperator(card, tokens, Targets, context, ref Params, i, ref exceptions);
-            }
-            else
-            {
-                return tokens[i].Value;
-            }
-        }
-        //bucle for
-        else if (tokens[i].Value == "for")
-        {
-            if (tokens[i + 1].Value == "target")
-            {
-                if (tokens[ i + 2].Value == "in")
+                if (tokens[i + 1].Value == "target")
                 {
-                    if (tokens[i + 3].Value == "targets")
+                    if (tokens[ i + 2].Value == "in")
                     {
-                        if (tokens[i + 4].Value == "{")
+                        if (tokens[i + 3].Value == "targets")
                         {
-
-                            List<Token> auxlist = new List<Token>();
-                            for (int k = i + 5;k < tokens.Count;k++)
+                            if (tokens[i + 4].Value == "{")
                             {
-                                if (tokens[k].Value == "}")
+                                List<Token> auxlist = new List<Token>();
+                                for (int k = i + 5;k < tokens.Count;k++)
                                 {
-                                    i = k;
-                                    break;
+                                    if (tokens[k].Value == "}")
+                                    {
+                                        break;
+                                    }
+                                    auxlist.Add(tokens[k]);
                                 }
-                                auxlist.Add(tokens[k]);
-                            }
-
-                            foreach (List<Card> targets in Targets)
-                            {
-                                foreach (Card target in targets)
+                                foreach (List<Card> targets in Targets)
                                 {
-                                    ActionParser_(target, auxlist, Targets, context, ref Params, i + 5, ref exceptions);
+                                    for (int j = 0; j < targets.Count; j++)
+                                    {
+                                        ActionParser_(targets[j], auxlist, Targets, context, ref Params, i + 5, ref exceptions);
+                                    }
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-        //Bucle while
-        else if (tokens[i].Value == "while")
-        {
-            if (tokens[i + 1].Value == "i")
+            //Bucle while
+            else if (tokens[i].Value == "while")
             {
-                //busco a i en los parámetros a ver si está declarada con un valor
-                int k = ComprobateParam(tokens[i],ref Params);
-                if (tokens[i + 2].Value == "+")
+                if (tokens[i + 1 ].Value == "(")
                 {
-                    if (tokens[i + 3].Value == "+")
+                    if (tokens[i + 2].Value == "i")
                     {
-                        if (tokens[i + 4].Value == "<")
+                        //busco a i en los parámetros a ver si está declarada con un valor
+                        int k = ComprobateParam(tokens[i + 2],ref Params);
+                        if (tokens[i + 3].Value == "+")
                         {
-                            if (tokens[ i + 5].Key == "PALABRA")
+                            if (tokens[i + 4].Value == "+")
                             {
-                                //busco al token en los parámetros a ver si está declarado con un valor
-                                int j = ComprobateParam(tokens[i + 5],ref Params);
-                                while ((int)Params[k].Value < (int)Params[j].Value)
+                                if (tokens[i + 5].Value == "<")
                                 {
-                                    List<Token> aux = new List<Token>();
-                                    for (int r = i + 6; r < tokens.Count; r++)
+                                    if (tokens[ i + 6].Key == "PALABRA")
                                     {
-                                        if (tokens[r].Value == ";")
+                                        //busco al token en los parámetros a ver si está declarado con un valor
+                                        int j = ComprobateParam(tokens[i + 6],ref Params);
+                                        int m = 0;
+                                        int f = int.Parse((string)Params[j].Value) - int.Parse((string)Params[k].Value);
+                                        while (m < f)
                                         {
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            aux.Add(tokens[r]);
+                                            List<Token> aux = new List<Token>();
+                                            for (int r = i + 6; r < tokens.Count; r++)
+                                            {
+                                                if (tokens[r].Value == ";")
+                                                {
+                                                    break;
+                                                }
+                                                else
+                                                {
+                                                    aux.Add(tokens[r]);
+                                                }
+                                            }
+                                            ActionParser_(card,aux,Targets,context,ref Params,i + 6,ref exceptions);
+                                            m++;
                                         }
                                     }
-                                    ActionParser_(card,aux,Targets,context,ref Params,i + 6,ref exceptions);
-                                }
-                            }
-                            else if (tokens[i + 5].Key == "NUMERO")
-                            {
-                                //hago el while
-                                while ((int)Params[k].Value < int.Parse(tokens[i + 5].Value))
-                                {
-                                    List<Token> aux = new List<Token>();
-                                    for (int r = i + 6; r < tokens.Count; r++)
+                                    else if (tokens[i + 6].Key == "NUMERO")
                                     {
-                                        if (tokens[r].Value == ";")
+                                        int m = 0;
+                                        int j = int.Parse(tokens[i + 6].Value) - int.Parse((string)Params[k].Value);
+                                        while (m < j)
                                         {
-                                            break;
-                                        }
-                                        else
-                                        {
-                                            aux.Add(tokens[r]);
+                                            List<Token> aux = new List<Token>();
+                                            for (int r = i + 6; r < tokens.Count; r++)
+                                            {
+                                                if (tokens[r].Value == ";")
+                                                {
+                                                    break;
+                                                }
+                                                else
+                                                {
+                                                    aux.Add(tokens[r]);
+                                                }
+                                            }
+                                            ActionParser_(card, aux, Targets, context, ref Params, i + 6, ref exceptions);
+                                            m++;
                                         }
                                     }
-                                    ActionParser_(card, aux, Targets, context, ref Params, i + 6, ref exceptions);
                                 }
                             }
                         }
                     }
                 }
             }
-        }
-        if (i < tokens.Count - 2)
-        {
-            return ActionParser_(card, tokens, Targets, context, ref Params, i + 1, ref exceptions);
+            if (i < tokens.Count - 2)
+            {
+                return ActionParser_(card, tokens, Targets, context, ref Params, i + 1, ref exceptions);
+            }
         }
         return "";
     }
@@ -227,6 +265,7 @@ public class ActionParser
         }
         @params.Add(new Params(token.Value));
         return @params.Count - 1;
+        
     }
     //Método para realizar operaciones entre variables y números
     public object ResolveOperator(Card card, List<Token> tokens, List<List<Card>> Targets, Context context, ref List<Params> Params, int i,ref List<Exceptions> exceptions)
@@ -408,6 +447,7 @@ public class ActionParser
                         case "Hand":
                             return ActionsInListsOfContext(card, tokens, Targets, context, ref Params, i, ref SelectDeckScript.players[k].Hand, ref exceptions);
                         case "Deck":
+                            
                             return ActionsInListsOfContext(card, tokens, Targets, context, ref Params, i, ref SelectDeckScript.players[k].DeckOfPlayer, ref exceptions);
                         case "Field":
                             if (k == 0)
@@ -504,53 +544,62 @@ public class ActionParser
                                 Card cartica = new Card();
                                 if (tokens[i + 4].Key == "PALABRA")
                                 {
-                                    cartica.PlayerAlQuePertenece = (string)Params[k].Value;
-                                    k = ReturnPlayerPosition(cartica, k);
-                                    if (k != -1)
+                                    int candela = ComprobateParam(tokens[i + 4],ref Params);
+                                    if (Params[candela].Value != null)
                                     {
-                                        if (k == 0 || k == 1)
+                                        cartica.PlayerAlQuePertenece = (string)Params[candela].Value;
+                                        k = ReturnPlayerPosition(cartica, k);
+                                        if (k != -1)
                                         {
-                                            if (tokens[i + 5].Value == ")")
+                                            if (k == 0 || k == 1)
                                             {
-                                                switch (tokens[i + 2].Value)
+                                                if (tokens[i + 5].Value == ")")
                                                 {
-                                                    case "HandOfPlayer":
-                                                        return SelectDeckScript.players[k].Hand;
-                                                    case "DeckOfPlayer":
-                                                        return SelectDeckScript.players[k].DeckOfPlayer;
-                                                    case "FieldOfPlayer":
-                                                        if (k == 0)
-                                                        {
-                                                            return SummonScript.InvoquedCardsPlayer1;
-                                                        }
-                                                        else
-                                                        {
-                                                            return SummonScript.InvoquedCardsPlayer2;
-                                                        }
-                                                    case "Graveyard":
-                                                        if (k == 0)
-                                                        {
-                                                            return SummonScript.CementeryPlayer1;
-                                                        }
-                                                        else
-                                                        {
-                                                            return SummonScript.CementeryPlayer2;
-                                                        }
+                                                    switch (tokens[i + 2].Value)
+                                                    {
+                                                        //Tengo error en esto ,tengo que pasarle un jugador a estas propiedades
+                                                        case "HandOfPlayer":
+                                                            return SelectDeckScript.players[k].Hand;
+                                                        case "DeckOfPlayer":
+                                                            return SelectDeckScript.players[k].DeckOfPlayer;
+                                                        case "FieldOfPlayer":
+                                                            if (k == 0)
+                                                            {
+                                                                return SummonScript.InvoquedCardsPlayer1;
+                                                            }
+                                                            else
+                                                            {
+                                                                return SummonScript.InvoquedCardsPlayer2;
+                                                            }
+                                                        case "Graveyard":
+                                                            if (k == 0)
+                                                            {
+                                                                return SummonScript.CementeryPlayer1;
+                                                            }
+                                                            else
+                                                            {
+                                                                return SummonScript.CementeryPlayer2;
+                                                            }
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    exceptions.Add(new Exceptions("Error ,faltó el corchete de cierre", 0, 0));
                                                 }
                                             }
                                             else
                                             {
-                                                exceptions.Add(new Exceptions("Error ,faltó el corchete de cierre", 0, 0));
+                                                exceptions.Add(new Exceptions("Error ,no se encontró el jugador al que pertenece la carta", 0, 0));
                                             }
                                         }
                                         else
                                         {
-                                            exceptions.Add(new Exceptions("Error ,no se encontró el jugador al que pertenece la carta", 0, 0));
+                                            exceptions.Add(new Exceptions("Error ,El token del player al que pertenece la carta debe ser una palabra", 0, 0));
                                         }
                                     }
                                     else
                                     {
-                                        exceptions.Add(new Exceptions("Error ,El token del player al que pertenece la carta debe ser una palabra", 0, 0));
+
                                     }
                                 }
                                 else
@@ -577,6 +626,37 @@ public class ActionParser
     {
         switch (tokens[i + 4].Value)
         {
+            case "Add":
+                if (tokens[i + 5].Value == "(")
+                {
+                    if (tokens[i + 7].Value == ")")
+                    {
+                        switch(tokens[i + 2].Value)
+                        {
+                            case "Hand":
+                            foreach (var param in Params)
+                            {
+                                if (param.Name == tokens[i + 6].Value)
+                                {
+                                    CardPrefab = SummonScript.CardPrefab_Copy;
+                                    Card cartica = (Card)param.Value;
+                                    if (cartica.PlayerAlQuePertenece == SelectDeckScript.players[0].Id)
+                                    {
+                                        summonScript.InstanciateCardLikeEffect((Card)param.Value, SelectDeckScript.players[0], 0,CardPrefab);
+                                    }
+                                    else
+                                    {
+                                        summonScript.InstanciateCardLikeEffect((Card)param.Value, SelectDeckScript.players[1], 1,CardPrefab);    
+                                    }
+                                    break;
+                                }
+                            }
+                            break;
+                            //PD : por problemas de lógica el Add solo se va a poder aplicar a la mano 
+                        }
+                    }
+                }
+                break;
             case "Push":
                 if (tokens[i + 5].Value == "(")
                 {
@@ -593,6 +673,7 @@ public class ActionParser
                             }
                             else
                             {
+                                Debug.Log("ay rico rico rico");
                                 cards.Add((Card)Params[aux2].Value);
                             }
                         }
@@ -651,9 +732,12 @@ public class ActionParser
                     {
                         if (cards.Count != 0)
                         {
+                            
                             Card aux = cards[cards.Count - 1];
                             cards.RemoveAt(cards.Count - 1);
-                            return aux;
+                            GameObject cardObject = new GameObject("Card");
+                            Card newCard = Card.CreateCard(cardObject, aux.CardName, 10.0, aux.Type, aux.Faction,aux.Range, aux.player, aux.EffectName);
+                            return newCard;
                         }
                         else
                         {
@@ -679,18 +763,40 @@ public class ActionParser
                         {
                             int aux = Params.Count;
                             int aux2 = ComprobateParam(tokens[i + 6], ref Params);
+
                             if (aux != Params.Count || aux2 == aux)
                             {
                                 exceptions.Add(new Exceptions("Variable no declarada como parámetro" + tokens[i + 6].Value,0,0));
                             }
                             else
                             {
+                                Card cardaux = new Card();
+                                if (Params[aux2].Name == "target")
+                                {
+                                    cardaux = card;
+                                }
+                                else
+                                {
+                                    cardaux = (Card)Params[aux2].Value;
+                                }
                                 foreach (Card card1 in cards)
                                 {
-                                    Card cardaux = (Card)Params[aux2].Value;
                                     if (card1.PlayerAlQuePertenece == cardaux.PlayerAlQuePertenece)
                                     {
-                                        cards.Remove(card1);
+                                        if (card1 != null)
+                                        {
+                                            Card[] allCards = FindObjectsOfType<Card>();
+
+                                            foreach (Card cartica in allCards)
+                                            {
+                                                if (cartica == card1)
+                                                {
+                                                    Destroy(card.gameObject); 
+                                                    break; 
+                                                }
+                                            }
+                                            cards.Remove(card1);
+                                        }
                                         break;
                                     }
                                 }

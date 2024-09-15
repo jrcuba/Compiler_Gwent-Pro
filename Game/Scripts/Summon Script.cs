@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class SummonScript : MonoBehaviour
 {
+    //Objetos del Juego y del Backend
     public static int CantCardsInHandPlayer1 = 10;
     public static int CantCardsInHandPlayer2 = 10;
 
@@ -14,6 +15,7 @@ public class SummonScript : MonoBehaviour
     public static bool IsplayinWithIa = false;
     public EffectsNoCompilables effectsNoCompilables;
     public GameObject CardPrefab;
+    public static GameObject CardPrefab_Copy;
     public static Transform HandPlayer1;
     public static Transform HandPlayer2;
     public static int RoundsWinsPlayer1 = 0;
@@ -56,22 +58,26 @@ public class SummonScript : MonoBehaviour
     public static List<GameObject> CementeryPlayer2Object = new List<GameObject>();
     private Vector3 InitialPosition;
 
+    //Inicialización de objetos base
     private void Start()
     {
         InitialPosition = transform.position;
-    }
-    private void Update()
-    {
-        PowerPointsTextPlayer1.text = PowerPointsPlayer1.ToString();
-        PowerPointsTextPlayer2.text = PowerPointsPlayer2.ToString();
-    }
-    public void Summon()
-    {
         Player1Id = SelectDeckScript.players[0].Id;
         Player2Id = SelectDeckScript.players[1].Id;
         //cada jugador debe cambiar 2 cartas al principio
         HandPlayer1 = GameControllerScript.HandPlayer1Copy;
         HandPlayer2 = GameControllerScript.HandPlayer2Copy;
+        CardPrefab_Copy = CardPrefab;
+    }
+    //Mostrar los puntos totales en todo momento
+    private void Update()
+    {
+        PowerPointsTextPlayer1.text = PowerPointsPlayer1.ToString();
+        PowerPointsTextPlayer2.text = PowerPointsPlayer2.ToString();
+    }
+    //Controlador del juego
+    public void Summon()
+    {
         Card card = GetComponent<Card>();
         if ((CountDraw2Cards == 0 || CountDraw2Cards == 1) && card.PlayerAlQuePertenece == SelectDeckScript.players[0].Id)
         {
@@ -86,10 +92,7 @@ public class SummonScript : MonoBehaviour
             CountDraw2Cards++;
             if (CountDraw2Cards == 2)
             {
-                DrawCard(SelectDeckScript.players[0].DeckOfPlayer[SelectDeckScript.players[0].DeckOfPlayer.Count - 1], HandPlayer1, SelectDeckScript.players[0],CardPrefab,0);
-                DrawCard(SelectDeckScript.players[0].DeckOfPlayer[SelectDeckScript.players[0].DeckOfPlayer.Count - 1], HandPlayer1, SelectDeckScript.players[0], CardPrefab, 0);
-
-                SystemMouseMover.isMoving = true;
+                Change2Cards(0, card,HandPlayer1);
             }
         }
         //Primera parte con ia lista
@@ -106,8 +109,7 @@ public class SummonScript : MonoBehaviour
             CountDraw2Cards++;
             if (CountDraw2Cards == 4)
             {
-                DrawCard(SelectDeckScript.players[1].DeckOfPlayer[SelectDeckScript.players[1].DeckOfPlayer.Count - 1], HandPlayer2, SelectDeckScript.players[1], CardPrefab, 1);
-                DrawCard(SelectDeckScript.players[1].DeckOfPlayer[SelectDeckScript.players[1].DeckOfPlayer.Count - 1], HandPlayer2, SelectDeckScript.players[1], CardPrefab, 1);
+                Change2Cards(1, card, HandPlayer2);
             }
             InvocatedBool = true;
         }
@@ -122,9 +124,10 @@ public class SummonScript : MonoBehaviour
                     //remover la carta de la mano
                     if (card.Range.Contains("Melee") && CardsOnMeleePlayer1.Count < 2) 
                     {
+                        //me queda eliminar de la mano 
                         CardsOnMeleePlayer1.Add(card);
                         CardsOnMeleePlayer1Object.Add(gameObject);
-                        transform.position = new Vector3(-6, -1.2f,90);
+                        transform.position = new Vector3(-2.5f, -0.5f,90);
                         DoTHinksPlayer1(card);
                         
                     }
@@ -132,14 +135,14 @@ public class SummonScript : MonoBehaviour
                     {
                         CardsOnRangedPlayer1.Add(card);
                         CardsOnRangedPlayer1Object.Add(gameObject);
-                        transform.position = new Vector3(-4, -1.2f, 90);
+                        transform.position = new Vector3(-2.5f, -1.33f, 90);
                         DoTHinksPlayer1(card);
                     }
                     else if (card.Range.Contains("Siege") && CardsOnSiegePlayer1.Count < 2)
                     {
                         CardsOnSiegePlayer1.Add(card);
                         CardsOnSiegePlayer1Object.Add(gameObject);
-                        transform.position = new Vector3(-2, -1.2f, 90);
+                        transform.position = new Vector3(-2.5f, -2.1f, 90);
                         DoTHinksPlayer1(card);
                     }
 
@@ -153,21 +156,21 @@ public class SummonScript : MonoBehaviour
                     {
                         CardsSpecialOnMeleePlayer1.Add(card);
                         CardsOnMeleePlayer1Object.Add(gameObject);
-                        transform.position = new Vector3(0, -1.2f, 90);
+                        transform.position = new Vector3(-0.5f, -0.5f, 90);
                         DoEffectCardThinksPlayer1(card);
                     }
                     else if (card.Range.Contains("Ranged") && CardsSpecialOnRangedPlayer1.Count < 1)
                     {
                         CardsSpecialOnRangedPlayer1.Add(card);
                         CardsOnRangedPlayer1Object.Add(gameObject);
-                        transform.position = new Vector3(0, -1.2f, 90);
+                        transform.position = new Vector3(-0.5f, -1.33f, 90);
                         DoEffectCardThinksPlayer1(card);
                     }
                     else if (card.Range.Contains("Siege") && CardsSpecialOnSiegePlayer1.Count < 1)
                     {
                         CardsSpecialOnSiegePlayer1.Add(card);
                         CardsOnSiegePlayer1Object.Add(gameObject);
-                        transform.position = new Vector3(0, -1.2f, 90);
+                        transform.position = new Vector3(-0.5f, -2.1f, 90);
                         DoEffectCardThinksPlayer1(card);
                     }
                 }
@@ -182,21 +185,21 @@ public class SummonScript : MonoBehaviour
                     {
                         CardsOnMeleePlayer2.Add(card);
                         CardsOnMeleePlayer2Object.Add(gameObject);
-                        transform.position = new Vector3(-6, 1.2f, 90);
+                        transform.position = new Vector3(-2.5f, 0.5f, 90);
                         DoThinksPlayer2(card);
                     }
                     else if (card.Range.Contains("Ranged") && CardsOnRangedPlayer2.Count < 2)
                     {
                         CardsOnRangedPlayer2.Add(card);
                         CardsOnRangedPlayer2Object.Add(gameObject);
-                        transform.position = new Vector3(-4, 1.2f, 90);
+                        transform.position = new Vector3(-2.5f, 1.25f, 90);
                         DoThinksPlayer2(card);
                     }
                     else if (card.Range.Contains("Siege") && CardsOnSiegePlayer2.Count < 2)
                     {
                         CardsOnSiegePlayer2.Add(card);
                         CardsOnSiegePlayer2Object.Add(gameObject);
-                        transform.position = new Vector3(-2, 1.2f, 90); 
+                        transform.position = new Vector3(-2.5f, 2f, 90);
                         DoThinksPlayer2(card);
                     }
                 }
@@ -210,14 +213,14 @@ public class SummonScript : MonoBehaviour
                         CardsSpecialOnMeleePlayer2.Add(card);
                         CardsOnMeleePlayer1Object.Add(gameObject);
                         SelectDeckScript.players[1].Hand.Remove(card);
-                        transform.position = new Vector3(0, 1.2f, 90);
+                        transform.position = new Vector3(-0.5f, 0.5f, 90);
                         DoEffectThinksPlayer2(card);
                     }
                     else if (card.Range.Contains("Ranged") && CardsSpecialOnRangedPlayer2.Count < 1)
                     {
                          CardsSpecialOnRangedPlayer2.Add(card);
                          CardsOnMeleePlayer1Object.Add(gameObject);
-                         transform.position = new Vector3(0, 1.2f, 90);
+                        transform.position = new Vector3(-0.5f, 1.25f, 90);
                         DoEffectThinksPlayer2(card);
 
                     }
@@ -225,13 +228,15 @@ public class SummonScript : MonoBehaviour
                     {
                         CardsSpecialOnSiegePlayer2.Add(card);
                         CardsOnMeleePlayer1Object.Add(gameObject);
-                        transform.position = new Vector3(0, 1.2f, 90);
+                        transform.position = new Vector3(-0.5f, 2f, 90);
                         DoEffectThinksPlayer2(card);
                     }
                 }
             }
         }
     }
+
+    //Método para robar carta
     public void DrawCard(Card card,Transform transform,Player player,GameObject Prefab,int PlayerPosition)
     {
         GameObject CardInstance = Instantiate(Prefab, transform);
@@ -267,6 +272,7 @@ public class SummonScript : MonoBehaviour
         player.Hand.Add(card);
         SelectDeckScript.players[PlayerPosition].DeckOfPlayer.Remove(card);
     }
+    //Método para verificar si está jugando con el Bot
     public static void IsPlayingWithIaMethod()
     {
         if (IsplayinWithIa)
@@ -281,6 +287,7 @@ public class SummonScript : MonoBehaviour
             
         }
     }
+    //Grupo de métodos para no repetir código de los jugadores
     private void DoTHinksPlayer1(Card card)
     {
         InvoquedCardsObjects.Add(gameObject);
@@ -291,11 +298,10 @@ public class SummonScript : MonoBehaviour
         InvoquedCards.Add(card);
         count++;
         gameObject.GetComponent<SummonScript>().enabled = false;
-        SelectDeckScript.players[0].Hand.Remove(card);
         PassTurnScript.RoundPassCount = 0;
         CantCardsInHandPlayer1--;
         RectTransform rect = gameObject.GetComponent<RectTransform>();
-        rect.localScale = new Vector3(0.5f, 0.5f);
+        rect.localScale = new Vector3(0.35f, 0.35f);
 
         effectsNoCompilables.InvocateEffect(gameObject.GetComponent<Card>());
     }
@@ -309,11 +315,10 @@ public class SummonScript : MonoBehaviour
         IsPlayingWithIaMethod();
         count++;
         gameObject.GetComponent<SummonScript>().enabled = false;
-        SelectDeckScript.players[0].Hand.Remove(card);
         PassTurnScript.RoundPassCount = 0;
         CantCardsInHandPlayer1--;
         RectTransform rect = gameObject.GetComponent<RectTransform>();
-        rect.localScale = new Vector3(0.5f, 0.5f);
+        rect.localScale = new Vector3(0.35f, 0.35f);
         if (!EffectsNoCompilables.PutIncreaseBool)
         {
             effectsNoCompilables.InvocateEffect(gameObject.GetComponent<Card>());
@@ -330,11 +335,10 @@ public class SummonScript : MonoBehaviour
         PowerPointsPlayer2 += double.Parse(card.Power.ToString());
         count--;
         gameObject.GetComponent<SummonScript>().enabled = false;
-        SelectDeckScript.players[1].Hand.Remove(card);
         PassTurnScript.RoundPassCount = 0;
         CantCardsInHandPlayer2--;
         RectTransform rect = gameObject.GetComponent<RectTransform>();
-        rect.localScale = new Vector3(0.5f, 0.5f);
+        rect.localScale = new Vector3(0.35f, 0.35f);
         effectsNoCompilables.InvocateEffect(gameObject.GetComponent<Card>());
     }
     private void DoEffectThinksPlayer2(Card card)
@@ -345,16 +349,33 @@ public class SummonScript : MonoBehaviour
         SelectDeckScript.players[1].Hand.Remove(card);
         count--;
         gameObject.GetComponent<SummonScript>().enabled = false;
-        SelectDeckScript.players[0].Hand.Remove(card);
         PassTurnScript.RoundPassCount = 0;
         CantCardsInHandPlayer2--;
         RectTransform rect = gameObject.GetComponent<RectTransform>();
-        rect.localScale = new Vector3(0.5f, 0.5f);
+        rect.localScale = new Vector3(0.35f, 0.35f);
 
         if (!EffectsNoCompilables.PutIncreaseBool)
         {
             effectsNoCompilables.InvocateEffect(gameObject.GetComponent<Card>());
         }
         EffectsNoCompilables.PutIncreaseBool = false;
+    }
+    public void InstanciateCardLikeEffect(Card card,Player player,int PlayerPosition,GameObject Prefab)
+    {
+        if (PlayerPosition == 0)
+            DrawCard(card,HandPlayer1, player, Prefab, PlayerPosition);
+        else
+        {
+            DrawCard(card, HandPlayer2, player, Prefab, PlayerPosition);
+        }
+    }
+    public void Change2Cards(int k,Card card,Transform HandPlayer)
+    {
+        SelectDeckScript.players[k].Hand.Add(SelectDeckScript.players[k].DeckOfPlayer[SelectDeckScript.players[k].DeckOfPlayer.Count - 1]);
+        DrawCard(SelectDeckScript.players[k].DeckOfPlayer[SelectDeckScript.players[k].DeckOfPlayer.Count - 1], HandPlayer, SelectDeckScript.players[k], CardPrefab, k);
+        SelectDeckScript.players[k].Hand.Add(SelectDeckScript.players[k].DeckOfPlayer[SelectDeckScript.players[k].DeckOfPlayer.Count - 1]);
+        DrawCard(SelectDeckScript.players[k].DeckOfPlayer[SelectDeckScript.players[k].DeckOfPlayer.Count - 1], HandPlayer, SelectDeckScript.players[k], CardPrefab, k);
+        SelectDeckScript.players[k].Hand.Add(SelectDeckScript.players[k].DeckOfPlayer[SelectDeckScript.players[k].DeckOfPlayer.Count - 1]);
+        SystemMouseMover.isMoving = true;
     }
 }

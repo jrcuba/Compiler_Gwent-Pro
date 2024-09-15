@@ -6,12 +6,12 @@ using UnityEngine;
 
 public class EffectsNoCompilables : MonoBehaviour
 {
+    public GameObject ActionParser;
     public static bool PutIncreaseBool = false;
-    // Efecto de poner un efecto en una fila propia
+    // Efecto de poner un Aumento
     private int k;
     public void PutIncrease(Card card, Player player)
     {
-        //reajustaré el efecto a invocar una carta de efecto de manera aleatoria
         SummonScript.count++;
         PutIncreaseBool = true;
     }
@@ -37,6 +37,7 @@ public class EffectsNoCompilables : MonoBehaviour
         {
             SummonScript.PowerPointsPlayer2 -= cardaux.Power;
         }
+        //TODO: agregar al cementerio ,eliminar del campo
         PrefabsCards.Remove(aux);
         Destroy(aux);
     }
@@ -46,10 +47,13 @@ public class EffectsNoCompilables : MonoBehaviour
         GameObject aux = PrefabsCards[0];
         foreach (GameObject Prefab in PrefabsCards)
         {
-            Card card = Prefab.GetComponent<Card>();
-            if (card.Power < aux.GetComponent<Card>().Power)
+            if (gameObject != null)
             {
-                aux = Prefab;
+                Card card = Prefab.GetComponent<Card>();
+                if (card.Power < aux.GetComponent<Card>().Power)
+                {
+                    aux = Prefab;
+                }
             }
         }
         Card cardaux = aux.GetComponent<Card>();
@@ -97,7 +101,6 @@ public class EffectsNoCompilables : MonoBehaviour
         // Asegúrate de que hay listas que considerar
         if (aux.Count == 0)
         {
-            Debug.Log("No objects to delete.");
             return; // No hay nada que eliminar
         }
 
@@ -139,19 +142,15 @@ public class EffectsNoCompilables : MonoBehaviour
         // Método para destruir los objetos de una lista.
         void destroy_(ref List<GameObject> objects, string listName)
         {
-            Debug.Log($"Destroying from {listName}. Objects Count: {objects.Count}"); // Debug para ver cuántos objetos se intentan destruir.
-
             foreach (GameObject obj in objects)
             {
                 if (obj != null) // Comprobar si el objeto es nulo
                 {
                     //TODO: ver la talla de los puntos de poder al destruir
                     Destroy(obj);
-                    Debug.Log($"Destroyed: {obj.name}");
                 }
             }
             objects.Clear(); // Limpiar la lista después de destruir
-            Debug.Log($"{listName} cleared.");
         }
     }
     //calcular el promedio de poder y se lo da a todas las cartas
@@ -252,11 +251,18 @@ public class EffectsNoCompilables : MonoBehaviour
                 RestartPower(SummonScript.InvoquedCardsObjects,InvoquedCards2);
                 break;
             default:
-                onActivationParser.OnActivation(card.OnActivationTokens,Compilar.effects,card,ref Compilar.exceptions,0);
+                onActivationParser.OnActivation(card.OnActivationTokens,Compilar.effects,card,ref Program.exceptions,0);
                 Context context = new Context();
-                if (onActivationParser.actionTokens.Count != 0)
+                Debug.Log(onActivationParser.effect.Name);
+                foreach (var item in onActivationParser.Targets)
                 {
-                    Program.actionParser.ActionParser_(card, onActivationParser.actionTokens, onActivationParser.Targets, context,ref onActivationParser.effect.Params, 0,ref Program.exceptions);
+                    Debug.Log(item.Count);
+                }
+                //Ya puedo empezar a hacer pruebas en esta talla
+                if (onActivationParser.effect.tokens.Count != 0)
+                { 
+                    Program.actionParser.ActionParser_(card, onActivationParser.effect.tokens, onActivationParser.Targets, context,ref onActivationParser.effect.Params, 0,ref Program.exceptions);
+                    Program.actionParser.ActionParser_(card, onActivationParser.effectPostAction.tokens, onActivationParser.TargetsPostAction, context, ref onActivationParser.effect.Params, 0, ref Program.exceptions);
                 }
                 break;
         }

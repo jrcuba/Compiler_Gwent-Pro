@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
+//Método para pasar y ver el siguiente mazo
 public class NextDeckScript : MonoBehaviour
 {
     public Text text;

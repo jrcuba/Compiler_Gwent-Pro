@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+//Método para seleccionar el deck 
 public class SelectDeckScript : MonoBehaviour
 {
     private static int count = 0;

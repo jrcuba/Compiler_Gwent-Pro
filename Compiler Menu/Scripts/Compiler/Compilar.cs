@@ -8,6 +8,7 @@ public class Compilar : MonoBehaviour
 {
     private static int count = 3;
     public static List<Effect> effects = new List<Effect>();
+    public static List<Card> cards = new List<Card>();
     public static List<Exceptions> exceptions = new List<Exceptions>();
     public Image Sprite;
     public Image Sprite2;
@@ -17,6 +18,7 @@ public class Compilar : MonoBehaviour
     {
         //y compilar también
         effects = Program.effects;
+        cards = Program.cards;
         exceptions = Program.exceptions;
         LoadDataBase.Mazos.Add("Mazo " + count,Program.cards);
         count++;

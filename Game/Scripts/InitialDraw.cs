@@ -24,7 +24,7 @@ public class GameControllerScript : MonoBehaviour
             // Barajar el deck
             player.DeckOfPlayer = Shuffle(ref player.DeckOfPlayer);
             // Robar 10 cartas
-            if (player.DeckOfPlayer.Count >= 10)
+            if (player.DeckOfPlayer.Count >= 12)
             {
                 player.Hand = InitialDraw(ref player.DeckOfPlayer);
             }

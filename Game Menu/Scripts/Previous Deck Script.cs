@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+//Método para recorrer los decks con un botón (ver el anterior)
 public class PreviousDeckScript : MonoBehaviour
 {
     public Text text;
